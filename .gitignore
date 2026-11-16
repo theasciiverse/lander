@@ -6,3 +6,6 @@ score.o
 screen.o
 state.o
 log.o
+out/
+stage/
+dist/
