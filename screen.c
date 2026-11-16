@@ -82,7 +82,7 @@ Introduction(WINDOW *screen)
 }
 
 static void
-zap()
+zap(int sig)
 {
 	endwin();
 	fcntl(fileno(stdin), F_SETFL, 0);
@@ -90,7 +90,7 @@ zap()
 }
 
 static void
-dumpcore()
+dumpcore(int sig)
 {
 	fcntl(fileno(stdin), F_SETFL, 0);
 	endwin();
