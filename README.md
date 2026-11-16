@@ -1,3 +1,16 @@
+## Play it with Asciiverse ##
+
+With av, the Asciiverse client (https://asciiverse.sh):
+
+```shell
+av install lander
+av play lander
+```
+
+The original README follows; what Asciiverse changed is in PATCHES.md.
+
+---
+
 # Lunar Lander #
 
 This is a C implementation of the old
