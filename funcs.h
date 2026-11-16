@@ -8,3 +8,6 @@ extern void InitScore(void);
 extern void InitMoves(WINDOW * screen);
 extern void DrawScreen(WINDOW *screen);
 extern const char *StatePath(const char *file);
+extern void ScRefresh(void);
+extern void ScOverlay(WINDOW *win, int y, int x);
+extern int GetKey(WINDOW *win);

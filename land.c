@@ -48,15 +48,15 @@ EndCurses(WINDOW *screen)
 	wclrtoeol(screen);	/* display best score */
 	wprintw(screen, "--Best Score: %d ", BestScore);
 	wprintw(screen, "with %d landing%s - press space--", BSLandings, BSLandings == 1 ? "" : "s");
-	wrefresh(screen);
-	while (wgetch(screen) != ' ');
+	ScRefresh();
+	while (GetKey(screen) != ' ');
 	endwin();		/* shut down curses */
 }
 
 static int
 CleanUp(WINDOW *screen)
 {
-	char ch;
+	int ch;
 
 	nodelay(screen, FALSE);
 	if (Score > BestScore)
@@ -68,10 +68,10 @@ CleanUp(WINDOW *screen)
 	ScReadDisplay(screen);
 	wmove(screen, 1, 0);
 	wprintw(screen, "--Game Over - Safe Landings: %d - another game?--", Landings);
-	wrefresh(screen);
+	ScRefresh();
 	do
 	{
-		ch = wgetch(screen);
+		ch = GetKey(screen);
 	} while (ch != 'Y' && ch != 'y' && ch != ' ' && ch != 'n');
 
 	return ch == 'Y' || ch == 'y' || ch == ' ';
@@ -106,7 +106,7 @@ Explode(WINDOW *screen, int Y_bang, int X_bang)
 	wstandout(screen);
 	mvwaddch(screen, SCR_ADJ(Y_bang), X_bang, '*');
 	wstandend(screen);
-	wrefresh(screen);
+	ScRefresh();
 	srand48(time((long *)0));
 	memset((char *)overlay, 0, sizeof(overlay));
 	particles = (AVERAGE + lrand48() % DEVIATION);
@@ -155,7 +155,7 @@ Explode(WINDOW *screen, int Y_bang, int X_bang)
 			if (touched)
 			{
 				flushinp();
-				wrefresh(screen);
+				ScRefresh();
 			}
 			path->old_y = draw_y;
 			path->old_x = draw_x;
@@ -171,7 +171,7 @@ Explode(WINDOW *screen, int Y_bang, int X_bang)
 		if (LEGAL_YX(toy, tox))
 			mvwaddch(screen, SCR_ADJ(toy), tox, old_chs[toy][tox]);
 	}
-	wrefresh(screen);
+	ScRefresh();
 }
 
 static int
@@ -211,7 +211,7 @@ FlyLander(WINDOW *screen, double y_move, double x_move)
 		wmove(screen, 0, 0);
 		wclrtoeol(screen);
 		wprintw(screen, "alt: %8.3f X: %8.2f dY: %7.3f dX: %7.3f Score: %5d", altitude, longditude, y_move, x_move, Score);
-		wrefresh(screen);
+		ScRefresh();
 	}
 	if (land_stat == LANDED)
 	{
@@ -220,7 +220,7 @@ FlyLander(WINDOW *screen, double y_move, double x_move)
 		wmove(screen, 1, 0);
 		wprintw(screen, "--Safe Landing Number: %d", Landings);
 		waddstr(screen, " - press space bar--");
-		while (wgetch(screen) != ' ');
+		while (GetKey(screen) != ' ');
 		nodelay(screen, TRUE);
 	}
 	return land_stat;

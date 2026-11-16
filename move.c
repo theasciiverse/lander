@@ -42,10 +42,10 @@ GetMove(WINDOW *screen, double *y_delta, double *x_delta)
 
 	if (Fuel > 0.0)
 	{
-		wrefresh(screen);
-		while ((ch = wgetch(screen)) != NO_INP)
+		ScRefresh();
+		while ((ch = GetKey(screen)) != NO_INP)
 		{
-			if (isdigit(ch))
+			if (ch >= '0' && ch <= '9')
 			{
 				index = ch - '0';
 				Power = PowerSet[index];
@@ -75,8 +75,8 @@ GetMove(WINDOW *screen, double *y_delta, double *x_delta)
 		if (Fuel < 0.0)
 			att3p = att2p = att1p = Power = Fuel = 0.0;
 	}
-	wmove(screen, LINES - 1, 0);
+	wmove(screen, SCREEN_ROWS - 1, 0);
 	wclrtoeol(screen);
 	wprintw(screen, "Thrust - L: %5.2f vert: %7.4f R: %5.2f Pow: %5.2f Fuel: %7.2f", att1p, att2p, att3p, Power, Fuel);
-	wrefresh(screen);
+	ScRefresh();
 }

@@ -12,3 +12,5 @@
 #define LEGAL_YX(y, x) ((y) < SCR_Y && (x) < SCR_X && (y) >= 0 && (x) >= 0)
 #define SCR_ADJ(y) (y + 1)   /* difference between lunarscape y and screen y */
 #define MAX_PADS 20        /* maximum number of landing pads in a lunarscape */
+#define SCREEN_ROWS 24        /* the whole display: status, lunarscape, thrust */
+#define SCREEN_COLS 80

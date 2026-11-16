@@ -59,29 +59,31 @@ ScDisplayErr(WINDOW *back_win, char *str)
 
 	getyx(back_win, old_y, old_x);
 	wmove(back_win, 0, 0);
-	wrefresh(back_win);
+	ScRefresh();
 	win_len = strlen(str) + 2;
-	err_win = newwin(3, win_len, LINES / 2 - 2, (COLS - win_len - 2) / 2);
+	err_win = newpad(3, win_len);
+	ScOverlay(err_win, SCREEN_ROWS / 2 - 2, (SCREEN_COLS - win_len - 2) / 2);
 	box(err_win, 0, 0);
 	mvwaddstr(err_win, 1, 1, str);
-	wrefresh(err_win);
+	ScRefresh();
 	sleep(3);
+	ScOverlay(NULL, 0, 0);
 	delwin(err_win);
 	wmove(back_win, old_y, old_x);
 	touchwin(back_win);
-	wrefresh(back_win);
+	ScRefresh();
 }
 
 static void
 PressSpace(WINDOW *back_win, WINDOW *cur_win, int y, int x, int sy, int sx)
 {
 	mvwaddstr(cur_win, sy, sx, "--press space--");
-	wrefresh(cur_win);
-	while (wgetch(cur_win) != ' ');
+	while (GetKey(back_win) != ' ');
+	ScOverlay(NULL, 0, 0);
 	delwin(cur_win);
 	wmove(back_win, y, x);
 	touchwin(back_win);
-	wrefresh(back_win);
+	ScRefresh();
 }
 
 void
@@ -97,8 +99,9 @@ ScReadDisplay(WINDOW *back_win)
 	fp = hs_file ? fopen(hs_file, "rb") : NULL;
 	getyx(back_win, old_y, old_x);
 	wmove(back_win, 0, 0);
-	wrefresh(back_win);
-	score_win = newwin(SC_WIN_LEN, 25, 2, 5);
+	ScRefresh();
+	score_win = newpad(SC_WIN_LEN, 25);
+	ScOverlay(score_win, 2, 5);
 	werase(score_win);
 	box(score_win, 0, 0);
 	items = 0;
@@ -114,7 +117,7 @@ ScReadDisplay(WINDOW *back_win)
 		return;
 	}
 	mvwaddstr(score_win, 1, (25 - sizeof(HEADER)) / 2, HEADER);
-	wrefresh(score_win);
+	ScRefresh();
 	for (i = 0; i < items; ++i)
 	{
 		wmove(score_win, 3 + i, 1);
@@ -177,11 +180,11 @@ UpdateScore(WINDOW *screen)
 	fuel_bonus = Fuel / 100.0 + 0.5;
 	sprintf(scr_buf, "Fuel bonus: %d", fuel_bonus);
 	mvwaddstr(screen, 3, 25, scr_buf);
-	wrefresh(screen);
+	ScRefresh();
 	diff_bonus = (Landings + 1) * 10;
 	sprintf(scr_buf, "Consecutive Landings Bonus: %d", diff_bonus);
 	mvwaddstr(screen, 4, 9, scr_buf);
-	wrefresh(screen);
+	ScRefresh();
 	Score += PadScore[pad_i] + fuel_bonus + diff_bonus;
 }
 

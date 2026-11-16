@@ -63,7 +63,93 @@ static int Old_Y, Old_X;
 #define L6 "'c' - set right retro to power level"
 #define L7 "--press space to start game--"
 #define L8 "Stacey Campbell at HCR, 1989"
-#define CENTRE(win, line, str) mvwaddstr(win, line, (COLS - sizeof(str)) / 2, str)
+#define CENTRE(win, line, str) mvwaddstr(win, line, (SCREEN_COLS - sizeof(str)) / 2, str)
+
+/*
+** The display is a pad of SCREEN_ROWS x SCREEN_COLS, drawn centred in the
+** terminal (Asciiverse). A pad, unlike a window, keeps what is on it when
+** the terminal shrinks, so after a resize it is simply shown again in the
+** new middle. Score tables and messages are smaller pads over it.
+*/
+
+static WINDOW *Pad, *Overlay;
+static int OrgY, OrgX, OverY, OverX;
+
+void
+ScRefresh(void)
+{
+	int rows, cols;
+
+	pnoutrefresh(Pad, 0, 0, OrgY, OrgX, OrgY + SCREEN_ROWS - 1, OrgX + SCREEN_COLS - 1);
+	if (Overlay != NULL)
+	{
+		getmaxyx(Overlay, rows, cols);
+		pnoutrefresh(Overlay, 0, 0, OrgY + OverY, OrgX + OverX, OrgY + OverY + rows - 1, OrgX + OverX + cols - 1);
+	}
+	doupdate();
+}
+
+void
+ScOverlay(WINDOW *win, int y, int x)
+{
+	Overlay = win;
+	OverY = y;
+	OverX = x;
+}
+
+/*
+** Recentre() - after a resize, show the display in the middle of the
+** terminal; while it is smaller than the display, say so and wait.
+*/
+
+static void
+Recentre(void)
+{
+#ifdef PDCURSES
+	resize_term(0, 0);
+#endif
+	while (LINES < SCREEN_ROWS || COLS < SCREEN_COLS)
+	{
+		werase(stdscr);
+		mvwprintw(stdscr, 0, 0, "Lander needs a terminal of %dx%d,", SCREEN_COLS, SCREEN_ROWS);
+		mvwprintw(stdscr, 1, 0, "this one is %dx%d.", COLS, LINES);
+		mvwaddstr(stdscr, 2, 0, "Make it bigger to go on.");
+		wrefresh(stdscr);
+		if (wgetch(stdscr) == KEY_RESIZE)
+		{
+#ifdef PDCURSES
+			resize_term(0, 0);
+#endif
+		}
+	}
+	OrgY = (LINES - SCREEN_ROWS) / 2;
+	OrgX = (COLS - SCREEN_COLS) / 2;
+	werase(stdscr);
+	wnoutrefresh(stdscr);
+	touchwin(Pad);
+	if (Overlay != NULL)
+		touchwin(Overlay);
+	ScRefresh();
+}
+
+/*
+** GetKey() - wgetch() for the display: shows it first, as wgetch() does
+** for a window, and recentres it on a resize.
+*/
+
+int
+GetKey(WINDOW *win)
+{
+	int ch;
+
+	for (;;)
+	{
+		ScRefresh();
+		if ((ch = wgetch(win)) != KEY_RESIZE)
+			return ch;
+		Recentre();
+	}
+}
 
 static void
 Introduction(WINDOW *screen)
@@ -78,7 +164,7 @@ Introduction(WINDOW *screen)
 	CENTRE(screen, 14, L6);
 	CENTRE(screen, 18, L8);
 	CENTRE(screen, 20, L7);
-	while (wgetch(screen) != ' ');
+	while (GetKey(screen) != ' ');
 }
 
 static void
@@ -109,8 +195,11 @@ InitialiseScreen(WINDOW **init_scr)
 	initscr();
 	noecho();
 	cbreak();
-	*init_scr = stdscr;
+	keypad(stdscr, TRUE);
+	*init_scr = Pad = newpad(SCREEN_ROWS, SCREEN_COLS);
 	screen = *init_scr;
+	keypad(screen, TRUE);
+	Recentre();
 #if 0
 	LineMap['\''] = '+';
 	LineMap['.'] = '+';
@@ -175,7 +264,7 @@ DrawScreen(WINDOW *screen)
 				mvwaddch(screen, scr_i, j, ch);
 		}
 	}
-	wrefresh(screen);
+	ScRefresh();
 	LastLegalY = SCR_ADJ(0);
 	LastLegalX = 0;
 	Old_Y = Old_X = -1;
@@ -211,7 +300,7 @@ MoveLander(WINDOW *screen, double land_y, double land_x)
 		}
 	}
 	if (touchup)
-		wrefresh(screen);
+		ScRefresh();
 	Old_Y = y;
 	Old_X = x;
 	if (new_legal)
