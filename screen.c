@@ -122,6 +122,7 @@ Recentre(void)
 #endif
 		}
 	}
+	Log("terminal %dx%d", COLS, LINES);
 	OrgY = (LINES - SCREEN_ROWS) / 2;
 	OrgX = (COLS - SCREEN_COLS) / 2;
 	werase(stdscr);
@@ -205,6 +206,7 @@ InitialiseScreen(WINDOW **init_scr)
 	*init_scr = Pad = newpad(SCREEN_ROWS, SCREEN_COLS);
 	screen = *init_scr;
 	keypad(screen, TRUE);
+	LogOpen();
 	Recentre();
 #if 0
 	LineMap['\''] = '+';

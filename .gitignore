@@ -5,3 +5,4 @@ move.o
 score.o
 screen.o
 state.o
+log.o

@@ -11,3 +11,5 @@ extern const char *StatePath(const char *file);
 extern void ScRefresh(void);
 extern void ScOverlay(WINDOW *win, int y, int x);
 extern int GetKey(WINDOW *win);
+extern void LogOpen(void);
+extern void Log(const char *fmt, ...);

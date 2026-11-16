@@ -2,8 +2,8 @@
 
 LIBS := -lcurses -lm
 
-OBJS := land.o screen.o move.o score.o state.o
-SRC := land.c screen.c move.c score.c state.c
+OBJS := land.o screen.o move.o score.o state.o log.o
+SRC := land.c screen.c move.c score.c state.c log.c
 INC := consts.h funcs.h
 BIN := /usr/local/bin
 OPT := -O2

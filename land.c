@@ -35,6 +35,7 @@ extern int Score;
 static void
 StartLander(double *init_dy, double *init_dx)
 {
+	Log("game start");
 	Landings = 0;
 	Score = 0;
 	FuelDec = 0.0;
@@ -64,6 +65,7 @@ CleanUp(WINDOW *screen)
 {
 	int ch;
 
+	Log("game over, %d landings, score %d", Landings, Score);
 	nodelay(screen, FALSE);
 	if (Score > BestScore)
 	{
@@ -214,11 +216,13 @@ FlyLander(WINDOW *screen, double y_move, double x_move)
 			Explode(screen, LastLegalY, LastLegalX);
 			break;
 		}
+		Log("tick alt %.3f X %.2f dY %.3f dX %.3f score %d status %d", altitude, longditude, y_move, x_move, Score, land_stat);
 		wmove(screen, 0, 0);
 		wclrtoeol(screen);
 		wprintw(screen, "alt: %8.3f X: %8.2f dY: %7.3f dX: %7.3f Score: %5d", altitude, longditude, y_move, x_move, Score);
 		ScRefresh();
 	}
+	Log(land_stat == LANDED ? "landed at %d,%d, score %d" : "crashed at %d,%d, score %d", LastLegalY, LastLegalX, Score);
 	if (land_stat == LANDED)
 	{
 		++Landings;
@@ -258,5 +262,6 @@ main(int argc, char *argv[])
 	}
 	while (CleanUp(screen));	/* while user wants another game */
 	EndCurses(screen);	/* final screen cleanup */
+	Log("session end");
 	return 0;
 }

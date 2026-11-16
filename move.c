@@ -45,6 +45,7 @@ GetMove(WINDOW *screen, double *y_delta, double *x_delta)
 		ScRefresh();
 		while ((ch = GetKey(screen)) != NO_INP)
 		{
+			Log("key %d %s", ch, keyname(ch));
 			if (ch >= '0' && ch <= '9')
 			{
 				index = ch - '0';
@@ -73,8 +74,12 @@ GetMove(WINDOW *screen, double *y_delta, double *x_delta)
 		*x_delta -= att3p;
 		Fuel -= att3p + att2p + att1p;
 		if (Fuel < 0.0)
+		{
 			att3p = att2p = att1p = Power = Fuel = 0.0;
+			Log("out of fuel");
+		}
 	}
+	Log("thrust L %.2f vert %.4f R %.2f pow %.2f fuel %.2f", att1p, att2p, att3p, Power, Fuel);
 	wmove(screen, SCREEN_ROWS - 1, 0);
 	wclrtoeol(screen);
 	wprintw(screen, "Thrust - L: %5.2f vert: %7.4f R: %5.2f Pow: %5.2f Fuel: %7.2f", att1p, att2p, att3p, Power, Fuel);
