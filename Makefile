@@ -9,8 +9,11 @@ BIN := /usr/local/bin
 OPT := -O2
 CFLAGS := -Wall $(OPT)
 
-lander: $(OBJS) lander.man
-	cc -o lander $(OBJS) $(LIBS)
+lander: $(OBJS)
+	$(CC) $(LDFLAGS) -o lander $(OBJS) $(LIBS)
+
+# the formatted man page; needs nroff (groff-base), so not part of the build
+man: lander.man
 
 $(OBJS): consts.h funcs.h
 
