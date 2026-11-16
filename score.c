@@ -1,8 +1,6 @@
 #include <stdio.h>
 #include <curses.h>
 #include <string.h>
-#include <unistd.h>
-#include <fcntl.h>
 #include <stdlib.h>
 #include "consts.h"
 #include "funcs.h"
@@ -66,7 +64,7 @@ ScDisplayErr(WINDOW *back_win, char *str)
 	box(err_win, 0, 0);
 	mvwaddstr(err_win, 1, 1, str);
 	ScRefresh();
-	sleep(3);
+	napms(3000);
 	ScOverlay(NULL, 0, 0);
 	delwin(err_win);
 	wmove(back_win, old_y, old_x);

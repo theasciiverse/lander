@@ -8,6 +8,12 @@
 #include "consts.h"
 #include "funcs.h"
 
+#ifdef _WIN32		/* no drand48() family on Windows (Asciiverse) */
+#define srand48(seed) srand((unsigned)(seed))
+#define lrand48() ((long)rand())
+#define drand48() (rand() / (RAND_MAX + 1.0))
+#endif
+
 #define INIT_DX_VAL 166.0	/* initial horizontal velocity */
 #define INIT_DX_INC 13.0	/* rate of init hor vel increase between landings */
 #define INIT_DY_VAL 0.0		/* initial vertical velocity */
@@ -107,7 +113,7 @@ Explode(WINDOW *screen, int Y_bang, int X_bang)
 	mvwaddch(screen, SCR_ADJ(Y_bang), X_bang, '*');
 	wstandend(screen);
 	ScRefresh();
-	srand48(time((long *)0));
+	srand48(time(NULL));
 	memset((char *)overlay, 0, sizeof(overlay));
 	particles = (AVERAGE + lrand48() % DEVIATION);
 	x_inc = M_PI_2 * (drand48() * 0.01 + 0.01);
@@ -161,7 +167,7 @@ Explode(WINDOW *screen, int Y_bang, int X_bang)
 			path->old_x = draw_x;
 			path->x += x_inc;
 		}
-		usleep(20 * 1000); /* Added in 2022. In 1989 the sin() call above achieved the same result. */
+		napms(20); /* Added in 2022. In 1989 the sin() call above achieved the same result. */
 	}
 	for (i = 0; i < particles; ++i)
 	{
@@ -183,7 +189,7 @@ FlyLander(WINDOW *screen, double y_move, double x_move)
 
 	for (land_stat = FLYING; land_stat == FLYING;)
 	{
-		sleep(1);
+		napms(1000);
 		GetMove(screen, &y_move, &x_move);
 		land_stat = MoveLander(screen, altitude, longditude);
 		switch (land_stat)

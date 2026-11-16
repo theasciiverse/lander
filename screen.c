@@ -171,10 +171,13 @@ static void
 zap(int sig)
 {
 	endwin();
+#ifndef _WIN32
 	fcntl(fileno(stdin), F_SETFL, 0);
+#endif
 	exit(1);
 }
 
+#ifndef _WIN32
 static void
 dumpcore(int sig)
 {
@@ -184,6 +187,7 @@ dumpcore(int sig)
 	kill(getpid(), SIGQUIT);
 	pause();
 }
+#endif
 
 void
 InitialiseScreen(WINDOW **init_scr)
@@ -191,7 +195,9 @@ InitialiseScreen(WINDOW **init_scr)
 	register WINDOW *screen;
 
 	signal(SIGINT, zap);
+#ifndef _WIN32
 	signal(SIGQUIT, dumpcore);
+#endif
 	initscr();
 	noecho();
 	cbreak();
