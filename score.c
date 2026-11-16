@@ -35,7 +35,7 @@ score_pad_t ScorePad[MAX_PADS];
 int Score;
 int BestScore = 0;
 
-static char *HSFile = HS_FILE;
+#define HS_FILE "lander.hs"
 static int TotalPads;
 
 static int
@@ -90,21 +90,23 @@ ScReadDisplay(WINDOW *back_win)
 	int old_y, old_x, items, i;
 	WINDOW *score_win;
 	FILE *fp;
+	const char *hs_file;
 	score_t score_pad[HS_ENTRIES];
 
-	if ((fp = fopen(HSFile, "r")) == NULL)
-	{
-		ScDisplayErr(back_win, "Unable to display HS file.");
-		return;
-	}
+	hs_file = StatePath(HS_FILE);
+	fp = hs_file ? fopen(hs_file, "rb") : NULL;
 	getyx(back_win, old_y, old_x);
 	wmove(back_win, 0, 0);
 	wrefresh(back_win);
 	score_win = newwin(SC_WIN_LEN, 25, 2, 5);
 	werase(score_win);
 	box(score_win, 0, 0);
-	items = fread((char *)score_pad, sizeof(score_t), HS_ENTRIES, fp);
-	fclose(fp);
+	items = 0;
+	if (fp != NULL)
+	{
+		items = fread((char *)score_pad, sizeof(score_t), HS_ENTRIES, fp);
+		fclose(fp);
+	}
 	if (items == 0)
 	{
 		mvwaddstr(score_win, 5, 1, "HS file empty.");
@@ -126,40 +128,31 @@ ScWrite(WINDOW *back_win)
 {
 	int items;
 	FILE *fp;
-	char *user;
+	const char *hs_file, *user;
 	score_t score_pad[HS_ENTRIES + 1];
 
 	if (Score == 0)
 		return;
-	if ((fp = fopen(HSFile, "r")) == NULL)
+	if ((hs_file = StatePath(HS_FILE)) == NULL)
 	{
-		ScDisplayErr(back_win, "Unable to read HS file.");
-		ScDisplayErr(back_win, "Attempting to create HS file.");
-		if (creat(HSFile, 0777) == -1)
-		{
-			ScDisplayErr(back_win, "Unable to create HS file, check pathname.");
-			return;
-		}
-	}
-	if ((fp = fopen(HSFile, "r")) == NULL)
-	{
-		ScDisplayErr(back_win, "Unable to read new HS file.");
+		ScDisplayErr(back_win, "No home folder for the HS file.");
 		return;
 	}
-	items = fread((char *)score_pad, sizeof(score_t), HS_ENTRIES, fp);
-	fclose(fp);
-	if ((user = getenv("LOGNAME")) == NULL)
+	items = 0;
+	if ((fp = fopen(hs_file, "rb")) != NULL)
 	{
-		ScDisplayErr(back_win, "Environment var LOGNAME must be set");
-		return;
+		items = fread((char *)score_pad, sizeof(score_t), HS_ENTRIES, fp);
+		fclose(fp);
 	}
-	strcpy(score_pad[items].name, user);
+	if ((user = getenv("LOGNAME")) == NULL && (user = getenv("USER")) == NULL && (user = getenv("USERNAME")) == NULL)
+		user = "player";
+	snprintf(score_pad[items].name, NAME_LEN, "%s", user);
 	score_pad[items].score = Score;
 	++items;
 	qsort((char *)score_pad, items, sizeof(score_t), ScCmp);
 	if (items > HS_ENTRIES)
 		items = HS_ENTRIES;
-	if ((fp = fopen(HSFile, "w")) == NULL)
+	if ((fp = fopen(hs_file, "wb")) == NULL)
 	{
 		ScDisplayErr(back_win, "Unable to write HS file.");
 		return;

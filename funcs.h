@@ -7,3 +7,4 @@ extern void InitialiseScreen(WINDOW **init_scr);
 extern void InitScore(void);
 extern void InitMoves(WINDOW * screen);
 extern void DrawScreen(WINDOW *screen);
+extern const char *StatePath(const char *file);

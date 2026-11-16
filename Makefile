@@ -1,15 +1,13 @@
 # Lander Makefile
 
-HSFILE := /usr/local/games/lib/lander.hs
 LIBS := -lcurses -lm
 
-OBJS := land.o screen.o move.o score.o
-SRC := land.c screen.c move.c score.c
+OBJS := land.o screen.o move.o score.o state.o
+SRC := land.c screen.c move.c score.c state.c
 INC := consts.h funcs.h
 BIN := /usr/local/bin
 OPT := -O2
-HSSTRING := '"$(HSFILE)"'
-CFLAGS := -Wall $(OPT) -DHS_FILE=$(HSSTRING)
+CFLAGS := -Wall $(OPT)
 
 lander: $(OBJS) lander.man
 	cc -o lander $(OBJS) $(LIBS)
